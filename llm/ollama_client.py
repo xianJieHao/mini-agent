@@ -1,41 +1,45 @@
-import json
-import config.config 
+# llm/ollama_client.py
+
 import requests
 
 
 class OllamaClient:
-    def __init__(self):
-        self.host = config.config.Config().host 
-        self.model = config.config.Config().model
+
+    def __init__(
+        self,
+        base_url="http://localhost:11434",
+        model="deepseek-r1:latest"
+    ):
+        self.base_url = base_url
+        self.model = model
+
 
     def chat(self, message):
-        url = f"{self.host}/api/chat"
-        print(f"当前模型: {self.model}")
-        print(f"请求信息: {message}")
+
+        url = f"{self.base_url}/api/chat"
+
+
         data = {
             "model": self.model,
-            "messages": message,
-            "stream": True,
+
+            "messages":[
+                {
+                    "role":"user",
+                    "content":message
+                }
+            ],
+
+            "stream":False
         }
+
 
         response = requests.post(
             url,
-            json=data,
-            stream=True
+            json=data
         )
-        anwer = ""
-      
-        for line in response.iter_lines():
-            if line:
-                
-                chunk = json.loads(line)
-             
-                text = chunk["message"]["content"]
-                anwer += text
-                print(
-                    text,
-                    end="",
-                    flush=True
-                )
-        print()
-        return anwer
+
+
+        result = response.json()
+
+
+        return result["message"]["content"]

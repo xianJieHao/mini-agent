@@ -1,36 +1,38 @@
-from llm.ollama_client import OllamaClient
-from agent.planner import Planner
-from agent.registry import ToolRegistry
-from tools.weather import WeatherTool
-from tools.sales import SalesTool
+# main.py
+
+
 from agent.agent import Agent
+
 
 
 def main():
 
-    client = OllamaClient()
 
-    planner = Planner()
+    agent = Agent()
 
-    registry = ToolRegistry()
-
-    registry.register(WeatherTool())
-
-    registry.register(SalesTool())
-
-
-    agent = Agent(client, planner, registry)
 
     while True:
 
-        question = input("你：")
 
-        if question == "exit":
+        user_input = input(
+            "You:"
+        )
+
+
+        if user_input == "exit":
             break
 
-        answer = agent.chat(question)
 
-        print(answer)
+        answer = agent.chat(
+            user_input
+        )
+
+
+        print(
+            "AI:",
+            answer
+        )
+
 
 
 if __name__ == "__main__":
