@@ -1,5 +1,3 @@
-# main.py
-
 
 from agent.agent import Agent
 
@@ -12,7 +10,6 @@ def main():
 
 
     while True:
-
 
         user_input = input(
             "You:"

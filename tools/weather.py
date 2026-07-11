@@ -12,4 +12,9 @@ class WeatherTool(Tool):
 
     def execute(self, city):
         return f"{city}今天30℃,晴天" 
-   
+    
+    @property
+    def parameters(self):
+        return {
+            "city": "城市名称"
+        }

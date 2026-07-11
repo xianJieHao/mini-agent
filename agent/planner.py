@@ -4,60 +4,50 @@ import json
 class Planner:
 
 
-    def __init__(self, llm):
+    def __init__(self, llm, registry):
 
         self.llm = llm
+        self.registry = registry
 
     def plan(self, message):
 
+        tools = self.registry.build_prompt()
 
         prompt = f"""
-你是一个任务规划器。
+        你是Agent Planner。
 
-你有以下工具：
+        你可以使用以下工具：
 
-1.weather
-功能：查询天气
-参数：
-city
+        {tools}
 
+        请选择一个工具。
 
-2.sales
-功能：查询销售数据
+        只能返回JSON。
 
+        格式：
 
-根据用户输入，
-选择需要调用的工具。
+        {{
+        "action":"",
+        "params":{{}}
+        }}
 
+        用户：
 
-只返回JSON。
-
-格式：
-
-{{
-"action":"",
-"params":{{}}
-}}
-
-
-用户输入：
-
-{message}
-
-"""
+        {message}
+        """
 
 
         response = self.llm.chat(
             prompt 
         )
 
-
-
         print(
             "Planner response:",
             response)
+        
+        response = self.clean_json(response)
 
-        return json.loads(self.clean_json(response))
+        return json.loads(response)
     
 
     def clean_json(self, text):

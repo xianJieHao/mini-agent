@@ -15,3 +15,8 @@ class SalesTool(Tool):
 
     def execute(self, month):
         return f"{month}月销售冠军:A公司" 
+    
+    def parameters(self):
+        return {
+            "month": "月份"
+        }

@@ -15,3 +15,11 @@ class Tool(ABC):
     @abstractmethod
     def execute(self, **kwargs):
         pass
+
+    @property
+    @abstractmethod
+    def parameters(self):
+        """
+        告诉LLM这个工具需要哪些参数
+        """
+        pass

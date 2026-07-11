@@ -13,3 +13,10 @@ class ToolRegistry:
 
     def list_tools(self):
         return list(self.tools.values())
+    
+    def build_prompt(self):
+        result = ""
+        for tool in self.list_tools():
+            result += f"工具：{tool.name}\n功能：{tool.description}\n参数：{tool.parameters}\n"
+        return result
+
