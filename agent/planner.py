@@ -1,58 +1,84 @@
+import json
+
 
 class Planner:
 
 
+    def __init__(self, llm):
+
+        self.llm = llm
+
     def plan(self, message):
 
 
-        if "天气" in message:
+        prompt = f"""
+你是一个任务规划器。
+
+你有以下工具：
+
+1.weather
+功能：查询天气
+参数：
+city
 
 
-            city = self.extract_city(message)
+2.sales
+功能：查询销售数据
 
 
-            return {
-                "action":"weather",
-                "params":{
-                    "city":city
-                }
-            }
+根据用户输入，
+选择需要调用的工具。
+
+
+只返回JSON。
+
+格式：
+
+{{
+"action":"",
+"params":{{}}
+}}
+
+
+用户输入：
+
+{message}
+
+"""
+
+
+        response = self.llm.chat(
+            prompt 
+        )
 
 
 
-        if "销售" in message:
+        print(
+            "Planner response:",
+            response)
+
+        return json.loads(self.clean_json(response))
+    
+
+    def clean_json(self, text):
 
 
-            return {
-                "action":"sales",
-                "params":{}
-            }
+        text = text.strip()
 
 
-
-        return {
-            "action":"chat",
-            "params":{}
-        }
+        if text.startswith("```"):
 
 
-
-    def extract_city(self, message):
-
-
-        cities = [
-            "广州",
-            "深圳",
-            "北京",
-            "上海"
-        ]
+            text = text.replace(
+                "```json",
+                ""
+            )
 
 
-        for city in cities:
+            text = text.replace(
+                "```",
+                ""
+            )
 
-            if city in message:
 
-                return city
-
-
-        return "未知城市"
+        return text.strip()

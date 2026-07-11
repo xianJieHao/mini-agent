@@ -16,7 +16,7 @@ class Agent:
         self.registry = ToolRegistry()
         self.registry.register(WeatherTool())
         self.registry.register(SalesTool())
-        self.planner = Planner()
+        self.planner = Planner(self.llm)
 
     def chat(self, message):
 
