@@ -4,7 +4,7 @@ from tools.tool import Tool
 class WeatherTool(Tool):
     @property
     def name(self):
-        return "WeatherTool"
+        return "weather"
 
     @property
     def description(self):

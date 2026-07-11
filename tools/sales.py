@@ -7,7 +7,7 @@ class SalesTool(Tool):
 
     @property
     def name(self):
-        return "SalesTool"
+        return "sales"
 
     @property
     def description(self):

@@ -1,4 +1,5 @@
 
+from agent.planner import Planner
 from agent.registry import ToolRegistry
 from llm.ollama_client import OllamaClient
 from tools.weather import WeatherTool
@@ -15,24 +16,26 @@ class Agent:
         self.registry = ToolRegistry()
         self.registry.register(WeatherTool())
         self.registry.register(SalesTool())
-
+        self.planner = Planner()
 
     def chat(self, message):
 
-        tools = self.registry.list_tools()
-
-        print("当前可用工具:")
-
-        for tool in tools:
-
-            print(
-                tool.name,
-                ":",
-                tool.description
-            )
-
-        answer = self.llm.chat(
+        action = self.planner.plan(
             message
         )
+      
+        print(
+            "Planner:",
+            action
+        )
 
-        return answer
+        if action["action"] == "chat":
+            return self.llm.chat(message)
+        
+        tool = self.registry.get(action["action"])
+
+        result = tool.execute(
+            **action["params"]
+        )
+
+        return result
