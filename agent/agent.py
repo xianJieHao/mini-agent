@@ -23,16 +23,12 @@ class Agent:
         action = self.planner.plan(
             message
         )
-      
-        print(
-            "Planner:",
-            action
-        )
+    
 
         if action["action"] == "chat":
             return self.llm.chat(message)
         
-        tool = self.registry.get(action["action"])
+        tool = self.registry.get_tool(action["action"])
 
         result = tool.execute(
             **action["params"]

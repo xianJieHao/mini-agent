@@ -6,17 +6,44 @@ from tools.tool import Tool
 class SalesTool(Tool):
 
     @property
-    def name(self):
-        return "sales"
+    def schema(self):
 
-    @property
-    def description(self):
-        return "统计销售数据"
-
-    def execute(self, month):
-        return f"{month}月销售冠军:A公司" 
-    
-    def parameters(self):
         return {
-            "month": "月份"
+
+            "type":"function",
+
+            "function":{
+
+                "name":"sales",
+
+                "description":"查询城市销售数据",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "city":{
+
+                            "type":"string",
+
+                            "description":"城市名称"
+                        }
+
+                    },
+
+                    "required":[
+                        "city"
+                    ]
+
+                }
+
+            }
+
         }
+
+
+    def execute(self, city):
+
+        return f"{city}今天销售额为100万"

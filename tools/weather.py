@@ -2,19 +2,46 @@ from tools.tool import Tool
 
 
 class WeatherTool(Tool):
-    @property
-    def name(self):
-        return "weather"
 
     @property
-    def description(self):
-        return "查询城市天气信息"
+    def schema(self):
+
+        return {
+
+            "type":"function",
+
+            "function":{
+
+                "name":"weather",
+
+                "description":"查询城市天气",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "city":{
+
+                            "type":"string",
+
+                            "description":"城市名称"
+                        }
+
+                    },
+
+                    "required":[
+                        "city"
+                    ]
+
+                }
+
+            }
+
+        }
+
 
     def execute(self, city):
-        return f"{city}今天30℃,晴天" 
-    
-    @property
-    def parameters(self):
-        return {
-            "city": "城市名称"
-        }
+
+        return f"{city}今天晴天，32度"
