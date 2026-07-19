@@ -1,45 +1,37 @@
-# llm/ollama_client.py
-
 import requests
 
 
 class OllamaClient:
 
-    def __init__(
+    def __init__(self):
+
+        self.base_url = "http://localhost:11434"
+
+        self.model = "qwen3-coder:30b"
+
+    def chat(
         self,
-        base_url="http://localhost:11434",
-        model="deepseek-r1:latest"
+        messages,
+        tools=None,
+        stream=False,
     ):
-        self.base_url = base_url
-        self.model = model
-
-
-    def chat(self, message):
 
         url = f"{self.base_url}/api/chat"
 
-
-        data = {
+        payload = {
             "model": self.model,
-
-            "messages":[
-                {
-                    "role":"user",
-                    "content":message
-                }
-            ],
-
-            "stream":False
+            "messages": messages,
+            "stream": stream,
         }
 
+        if tools is not None:
+            payload["tools"] = tools
 
         response = requests.post(
             url,
-            json=data
+            json=payload,
         )
 
+        response.raise_for_status()
 
-        result = response.json()
-
-
-        return result["message"]["content"]
+        return response.json()["message"]
