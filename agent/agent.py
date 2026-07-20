@@ -29,52 +29,75 @@ class Agent:
         #第一次请求LLM，获取tool调用信息
         response = self.llm.chat(
 
-            messages,
+            messages = messages,
 
-            self.registry.get_all_schemas()
+            tools = self.registry.get_all_schemas(),
+
+            stream = False 
 
         )
+
+        print(f"response:{response}")
+
+
+
+# {
+# 	'role': 'assistant',
+# 	'content': '',
+# 	'tool_calls': [{
+# 		'id': 'call_o41z5dvo',
+# 		'function': {
+# 			'index': 0,
+# 			'name': 'weather',
+# 			'arguments': {
+# 				'city': '广州'
+# 			}
+# 		}
+# 	}]
+# }
+
+
 
 
         if "tool_calls" not in response:
              return response["content"]
 
 
-        tool_calls = response.get("tool_calls")
-
-        #获取工具调用信息
-        tool_call = tool_calls[0]
-
-        function = tool_call["function"]
-
-        tool_name = function["name"]
-
-        args = function["arguments"]
-        
-        result = self.registry.execute(
-            tool_name,
-            **args
-        )
         #加入LLM回复
-
         messages.append(
             response
         )
 
-        #加入工具结果
-        messages.append(
 
-            {
+        tool_calls = response.get("tool_calls")
 
-                "role": "tool",
+        #获取工具调用信息
 
-                "content": result,
 
-                "tool_call_id": tool_call["id"]
+        for tool_call in tool_calls:
+            
+            function = tool_call["function"]
 
-            }
-        )
+            tool_name = function["name"]
 
+            args = function["arguments"]
+            
+           
+            result = self.registry.execute(
+                    tool_name,
+                    **args
+                    )
+            
+            messages.append(
+                {
+                    "role":"tool",
+                    "content":result,
+                    "tool_call_id":tool_call["id"]
+                }
+            )
+
+
+        print(f"messages:{messages}")
 
         # 第二次调用LLM
 
