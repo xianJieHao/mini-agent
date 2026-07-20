@@ -1,28 +1,37 @@
-from llm.ollama_client import OllamaClient
-from agent.registry import ToolRegistry
-import json
+from agent.message import MessageManager
+from agent.executor import ToolExecutor
+
 
 
 class Agent:
 
 
-    def __init__(self,llm,registry):
+    def __init__(
+        self,
+        llm,
+        registry
+    ):
 
         self.llm = llm
+
         self.registry = registry
 
+        self.executor = ToolExecutor(
+            registry
+        )
 
 
-    def run(self,message):
 
-        messages = [
+    def run(self,user_input):
 
-            {
-                "role":"user",
-                "content":message
-            }
 
-        ]
+        memory = MessageManager()
+
+
+        memory.add_user(
+            user_input
+        )
+
 
 
         while True:
@@ -30,89 +39,44 @@ class Agent:
 
             response = self.llm.chat(
 
-                messages=messages,
+                messages=
+                memory.get_messages(),
 
-                tools=self.registry.get_all_schemas()
+                tools=
+                self.registry.get_all_schemas()
 
             )
 
 
-            print("LLM Response:")
-            print(response)
+            tool_calls = response.get(
+                "tool_calls"
+            )
 
 
-
-            # 没有工具调用
-            if "tool_calls" not in response:
+            if not tool_calls:
 
                 return response["content"]
 
 
 
-            # 保存assistant消息
-
-            messages.append(response)
-
-
-
-            tool_calls = response["tool_calls"]
+            memory.add_assistant(
+                response
+            )
 
 
 
             for tool_call in tool_calls:
 
 
-                function = tool_call["function"]
-
-
-                tool_name = function["name"]
-
-
-                args = function["arguments"]
-
-
-
-                print(
-                    f"执行工具:{tool_name}"
+                result = self.executor.execute(
+                    tool_call
                 )
 
 
-            try:
+                memory.add_tool(
 
-                result = self.registry.execute(
+                    result["tool_call_id"],
 
-                    tool_name,
-
-                    **args
+                    result["content"]
 
                 )
-
-            except Exception as e:
-
-                result = {
-
-                    "error": str(e)
-
-                }
-
-
-
-                messages.append(
-
-                {
-
-                    "role":"tool",
-
-                    "tool_call_id":tool_call["id"],
-
-                    "content":json.dumps(
-
-                        result,
-
-                        ensure_ascii=False
-
-                    )
-
-                }
-
-            )
