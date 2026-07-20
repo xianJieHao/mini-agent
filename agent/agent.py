@@ -77,6 +77,7 @@ class Agent:
                 )
 
 
+            try:
 
                 result = self.registry.execute(
 
@@ -86,23 +87,32 @@ class Agent:
 
                 )
 
+            except Exception as e:
+
+                result = {
+
+                    "error": str(e)
+
+                }
+
 
 
                 messages.append(
 
-                    {
+                {
 
-                        "role":"tool",
+                    "role":"tool",
 
-                        "tool_call_id":
-                            tool_call["id"],
+                    "tool_call_id":tool_call["id"],
 
-                        "content":
-                            json.dumps(
-                                result,
-                                ensure_ascii=False
-                            )
+                    "content":json.dumps(
 
-                    }
+                        result,
 
-                )
+                        ensure_ascii=False
+
+                    )
+
+                }
+
+            )
