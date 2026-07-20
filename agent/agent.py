@@ -1,9 +1,6 @@
-
-from agent.registry import ToolRegistry
 from llm.ollama_client import OllamaClient
-from tools.weather import WeatherTool
-from tools.sales import SalesTool
-
+from agent.registry import ToolRegistry
+import json
 
 
 class Agent:
@@ -13,9 +10,10 @@ class Agent:
 
         self.llm = llm
         self.registry = registry
-  
-    
-    def run(self, message):
+
+
+
+    def run(self,message):
 
         messages = [
 
@@ -26,86 +24,85 @@ class Agent:
 
         ]
 
-        #第一次请求LLM，获取tool调用信息
-        response = self.llm.chat(
 
-            messages = messages,
-
-            tools = self.registry.get_all_schemas(),
-
-            stream = False 
-
-        )
-
-        print(f"response:{response}")
+        while True:
 
 
+            response = self.llm.chat(
 
-# {
-# 	'role': 'assistant',
-# 	'content': '',
-# 	'tool_calls': [{
-# 		'id': 'call_o41z5dvo',
-# 		'function': {
-# 			'index': 0,
-# 			'name': 'weather',
-# 			'arguments': {
-# 				'city': '广州'
-# 			}
-# 		}
-# 	}]
-# }
+                messages=messages,
 
+                tools=self.registry.get_all_schemas()
 
-
-
-        if "tool_calls" not in response:
-             return response["content"]
-
-
-        #加入LLM回复
-        messages.append(
-            response
-        )
-
-
-        tool_calls = response.get("tool_calls")
-
-        #获取工具调用信息
-
-
-        for tool_call in tool_calls:
-            
-            function = tool_call["function"]
-
-            tool_name = function["name"]
-
-            args = function["arguments"]
-            
-           
-            result = self.registry.execute(
-                    tool_name,
-                    **args
-                    )
-            
-            messages.append(
-                {
-                    "role":"tool",
-                    "content":result,
-                    "tool_call_id":tool_call["id"]
-                }
             )
 
 
-        print(f"messages:{messages}")
-
-        # 第二次调用LLM
-
-        final_response = self.llm.chat(
-
-            messages
-
-        )
+            print("LLM Response:")
+            print(response)
 
 
-        return final_response["content"]
+
+            # 没有工具调用
+            if "tool_calls" not in response:
+
+                return response["content"]
+
+
+
+            # 保存assistant消息
+
+            messages.append(response)
+
+
+
+            tool_calls = response["tool_calls"]
+
+
+
+            for tool_call in tool_calls:
+
+
+                function = tool_call["function"]
+
+
+                tool_name = function["name"]
+
+
+                args = function["arguments"]
+
+
+
+                print(
+                    f"执行工具:{tool_name}"
+                )
+
+
+
+                result = self.registry.execute(
+
+                    tool_name,
+
+                    **args
+
+                )
+
+
+
+                messages.append(
+
+                    {
+
+                        "role":"tool",
+
+                        "tool_call_id":
+                            tool_call["id"],
+
+                        "content":
+                            json.dumps(
+                                result,
+                                ensure_ascii=False
+                            )
+
+                    }
+
+                )
