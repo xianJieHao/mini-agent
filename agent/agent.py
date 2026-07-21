@@ -9,7 +9,8 @@ class Agent:
     def __init__(
         self,
         llm,
-        registry
+        registry,
+        memory
     ):
 
         self.llm = llm
@@ -19,19 +20,26 @@ class Agent:
         self.executor = ToolExecutor(
             registry
         )
+        self.memory = self.memory
 
 
 
     def run(self,user_input):
 
 
-        memory = MessageManager()
+        self.memory.add(
 
+            {
+                "role":"user",
 
-        memory.add_user(
-            user_input
+                "content":user_input
+
+            }
+
         )
 
+
+    
 
 
         while True:
@@ -39,11 +47,9 @@ class Agent:
 
             response = self.llm.chat(
 
-                messages=
-                memory.get_messages(),
+                messages=self.memory.get(),
 
-                tools=
-                self.registry.get_all_schemas()
+                tools=self.registry.get_all_schemas()
 
             )
 
@@ -59,9 +65,7 @@ class Agent:
 
 
 
-            memory.add_assistant(
-                response
-            )
+            self.memory.add(response)
 
 
 
@@ -73,10 +77,17 @@ class Agent:
                 )
 
 
-                memory.add_tool(
+                
+                self.messages.append(
 
-                    result["tool_call_id"],
+                    {
 
-                    result["content"]
+                        "role":"tool",
+
+                        "tool_call_id":tool_call["tool_call_id"],
+
+                        "content":result["content"]
+
+                    }
 
                 )
