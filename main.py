@@ -4,6 +4,7 @@ from agent.registry import ToolRegistry
 from llm.ollama_client import OllamaClient
 from tools.sales import SalesTool
 from tools.weather import WeatherTool
+from memory.memory import Menmory
 
 
 
@@ -14,8 +15,8 @@ def main():
     registry = ToolRegistry()
     registry.register(WeatherTool())
     registry.register(SalesTool())
-    
-    agent = Agent(llm, registry)
+    memory = Menmory()
+    agent = Agent(llm=llm, registry=registry, memory=memory)
 
     while True:
 

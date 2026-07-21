@@ -20,12 +20,16 @@ class Agent:
         self.executor = ToolExecutor(
             registry
         )
-        self.memory = self.memory
+        self.memory = memory
+
+        #为了防止循环卡死
+        self._max_iterations = 3
 
 
 
-    def run(self,user_input):
+    def run(self, user_input):
 
+        
 
         self.memory.add(
 
@@ -39,11 +43,11 @@ class Agent:
         )
 
 
-    
+        iterations = 0
+        
+        while iterations < self._max_iterations:
 
-
-        while True:
-
+            iterations += 1
 
             response = self.llm.chat(
 
@@ -60,6 +64,8 @@ class Agent:
 
 
             if not tool_calls:
+                 #打印记忆
+                self.memory.print()
 
                 return response["content"]
 
@@ -78,16 +84,21 @@ class Agent:
 
 
                 
-                self.messages.append(
+                self.memory.add(
 
                     {
 
                         "role":"tool",
 
-                        "tool_call_id":tool_call["tool_call_id"],
+                        "tool_call_id":result["tool_call_id"],
 
                         "content":result["content"]
 
                     }
 
                 )
+
+               
+        
+        # 超过最大迭代次数时返回最后响应
+        return response.get("content", "达到最大迭代次数限制")
