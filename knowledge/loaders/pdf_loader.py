@@ -1,3 +1,5 @@
+import os
+
 from pypdf import PdfReader
 
 from knowledge.document import Document
@@ -11,15 +13,17 @@ class PDFLoader(Loader):
 
         documents = []
         for page_number, page in enumerate(reader.pages):
-            text = page.extract_text()
+            text = page.extract_text() or ""
 
-            print(f"text:={text}")
-            print("/n")
-            
+            if not text.strip():
+                continue
+
+            filename = os.path.basename(path)
+
             doc = Document(
                 page_content=text,
                 metadata={
-                    "source": path,
+                    "source": filename,
                     "page": page_number + 1
                 }
             )
